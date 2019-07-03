@@ -1,0 +1,233 @@
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create VPC for proxy demo
+Parameters:
+
+  VPCCidrBlock:
+    Type: String
+    Description: CIDR block for VPC to deploy. (X.X.X.X/X)
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$
+    Default: 10.0.0.0/16
+  PublicSubnetCIDR1:
+    Type: String
+    Description: First public subnet CIDR 
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$
+    Default: 10.0.1.0/24
+  PublicSubnetCIDR2:
+    Type: String
+    Description: Second public subnet CIDR 
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$
+    Default: 10.0.2.0/24
+  PublicSubnetCIDR3:
+    Type: String
+    Description: Third public subnet CIDR 
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$
+    Default: 10.0.3.0/24
+  PrivateSubnetCIDR1:
+    Type: String
+    Description: First private subnet CIDR 
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$
+    Default: 10.0.4.0/24
+  PrivateSubnetCIDR2:
+    Type: String
+    Description: Second private subnet CIDR 
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$
+    Default: 10.0.5.0/24
+  PrivateSubnetCIDR3:
+    Type: String
+    Description: Thirs private subnet CIDR 
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$
+    Default: 10.0.6.0/24
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref 'VPCCidrBlock'
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${AWS::StackName}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Internet Gateway
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref 'InternetGateway'
+      VpcId: !Ref 'VPC'
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref 'PublicSubnetCIDR1'
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      MapPublicIpOnLaunch: 'false'
+      Tags:
+        - Key: Name
+          Value: Public subnet 1
+
+      VpcId: !Ref 'VPC'
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref 'PublicSubnetCIDR2'
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      MapPublicIpOnLaunch: 'false'
+      Tags:
+        - Key: Name
+          Value: Public subnet 2
+      VpcId: !Ref 'VPC'
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref 'PublicSubnetCIDR3'
+      AvailabilityZone: !Select
+        - '2'
+        - !GetAZs ''
+      MapPublicIpOnLaunch: 'false'
+      Tags:
+        - Key: Name
+          Value: Pubic subnet 3
+
+      VpcId: !Ref 'VPC'
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+      Tags:
+        - Key: Name
+          Value: Public Route Table
+  AttachPublicSubnet1RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      SubnetId: !Ref 'PublicSubnet1'
+  AttachPublicSubnet2RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      SubnetId: !Ref 'PublicSubnet2'
+  AttachPublicSubnet3RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      SubnetId: !Ref 'PublicSubnet3'
+  PublicRoutetoInternet:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+      RouteTableId: !Ref 'PublicRouteTable'
+  
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref 'PrivateSubnetCIDR1'
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      MapPublicIpOnLaunch: 'false'
+      Tags:
+        - Key: Name
+          Value: Private Subnet 1
+      VpcId: !Ref 'VPC'
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref 'PrivateSubnetCIDR2'
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      MapPublicIpOnLaunch: 'false'
+      Tags:
+        - Key: Name
+          Value: Private Subnet 2
+      VpcId: !Ref 'VPC'
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref 'PrivateSubnetCIDR3'
+      AvailabilityZone: !Select
+        - '2'
+        - !GetAZs ''
+      MapPublicIpOnLaunch: 'false'
+      Tags:
+        - Key: Name
+          Value: Private Subnet 3
+      VpcId: !Ref 'VPC'
+ 
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+      Tags:
+        - Key: Name
+          Value: Private Route Table 1
+  AttachPrivateSubnet1RouteTable1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref 'PrivateRouteTable1'
+      SubnetId: !Ref 'PrivateSubnet1'
+  AttachPrivateSubnet2RouteTable1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref 'PrivateRouteTable1'
+      SubnetId: !Ref 'PrivateSubnet2'
+  AttachPrivateSubnet3RouteTable1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref 'PrivateRouteTable1'
+      SubnetId: !Ref 'PrivateSubnet3'
+
+
+Outputs:
+  VPCID:
+    Description: VPC ID
+    Value: !Ref 'VPC'
+    Export:
+      Name: !Sub 'VPC'
+  VPCCidrBlock:
+    Description: VPC Cidr Block
+    Value: !Ref 'VPCCidrBlock'
+    Export:
+      Name: !Sub '${AWS::StackName}-VPCCidrBlock'
+  PublicSubnet1:
+    Description: Public Subnet 1
+    Value: !Ref 'PublicSubnet1'
+    Export:
+      Name: !Sub '${AWS::StackName}-public-subnet-1'
+  PublicSubnet2:
+    Description: Public Subnet 2
+    Value: !Ref 'PublicSubnet2'
+    Export:
+      Name: !Sub '${AWS::StackName}-public-subnet-2'
+  PublicSubnet3:
+    Description: Public Subnet 3
+    Value: !Ref 'PublicSubnet3'
+    Export:
+      Name: !Sub '${AWS::StackName}-public-subnet-3'
+  PrivateSubnet1:
+    Description: Private Subnet 1
+    Value: !Ref 'PrivateSubnet1'
+    Export:
+      Name: !Sub '${AWS::StackName}-private-subnet-1'
+  PrivateSubnet2:
+    Description: Private Subnet 2
+    Value: !Ref 'PrivateSubnet2'
+    Export:
+      Name: !Sub '${AWS::StackName}-private-subnet-2'
+  PrivateSubnet3:
+    Description: Private Subnet 3
+    Value: !Ref 'PrivateSubnet3'
+    Export:
+      Name: !Sub '${AWS::StackName}-private-subnet-3'
