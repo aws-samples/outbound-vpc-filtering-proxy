@@ -530,8 +530,8 @@ Resources:
                  # And finally deny all other access to this proxy
                  http_access deny all
 
-                 # Squid normally listens to port 3128
-                 http_port 3128 ssl-bump cert=/etc/squid/cert.pem
+                 # Squid normally listens to port 3128, but needs to be parametrized here
+                 http_port ${ProxyPort} ssl-bump cert=/etc/squid/cert.pem
                  acl allowed_https_sites ssl::server_name "/etc/squid/squid.allowed.sites.txt"
                  acl step1 at_step SslBump1
                  acl step2 at_step SslBump2
