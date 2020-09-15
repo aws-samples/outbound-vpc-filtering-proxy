@@ -483,6 +483,10 @@ Resources:
                  acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
                  acl localnet src 127.0.0.1
 
+                 # The Instance Metadata Service
+                 # (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html#instance-metadata-limiting-access)
+                 acl imds dst 169.254.169.254
+
 
                  acl SSL_ports port 443
                  acl Safe_ports port 80		# http
@@ -500,6 +504,9 @@ Resources:
                  #
                  # Recommended minimum Access Permission configuration:
                  #
+                 # Deny requests to the Instance Metadata Service
+                 http_access deny imds
+
                  # Deny requests to certain unsafe ports
                  http_access deny !Safe_ports
 
