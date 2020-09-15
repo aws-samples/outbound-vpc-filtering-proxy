@@ -517,10 +517,8 @@ Resources:
                  http_access allow localhost manager
                  http_access deny manager
 
-                 # We strongly recommend the following be uncommented to protect innocent
-                 # web applications running on the proxy server who think the only
-                 # one who can access services on "localhost" is a local user
-                 #http_access deny to_localhost
+                 # Deny requests to services running on localhost
+                 http_access deny to_localhost
 
                  #
                  # INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
