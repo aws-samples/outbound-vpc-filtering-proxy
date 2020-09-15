@@ -483,6 +483,10 @@ Resources:
                  acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
                  acl localnet src 127.0.0.1
 
+                 # The Instance Metadata Service
+                 # (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html#instance-metadata-limiting-access)
+                 acl imds dst 169.254.169.254
+
 
                  acl SSL_ports port 443
                  acl Safe_ports port 80		# http
@@ -500,6 +504,9 @@ Resources:
                  #
                  # Recommended minimum Access Permission configuration:
                  #
+                 # Deny requests to the Instance Metadata Service
+                 http_access deny imds
+
                  # Deny requests to certain unsafe ports
                  http_access deny !Safe_ports
 
@@ -510,10 +517,8 @@ Resources:
                  http_access allow localhost manager
                  http_access deny manager
 
-                 # We strongly recommend the following be uncommented to protect innocent
-                 # web applications running on the proxy server who think the only
-                 # one who can access services on "localhost" is a local user
-                 #http_access deny to_localhost
+                 # Deny requests to services running on localhost
+                 http_access deny to_localhost
 
                  #
                  # INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
